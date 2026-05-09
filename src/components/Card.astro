@@ -1,61 +1,175 @@
 ---
 interface Props {
-	title: string;
-	body: string;
-	href: string;
+  title: string;
+  description: string;
+  href: string;
+  tags?: string[];       // tecnologías usadas, ej: ["React", "Node"]
+  year?: string;         // ej: "2024"
+  status?: "uncontinued" | "wip" | "archived";
 }
 
-const { href, title, body } = Astro.props;
+const {
+  href,
+  title,
+  description,
+  tags = [],
+  year = "",
+  status = "uncontinued",
+} = Astro.props;
+
+const statusLabel = {
+  uncontinued: "Sin continuar",
+  wip: "En progreso",
+  archived: "Archivado",
+};
 ---
 
-<li class="link-card">
-	<a href={href}>
-		<h2>
-			{title}
-			<span>&rarr;</span>
-		</h2>
-		<p>
-			{body}
-		</p>
-	</a>
+<li class="card">
+  <a href={href} target="_blank" rel="noopener noreferrer">
+    <div class="card-header">
+      <span class={`status status--${status}`}>{statusLabel[status]}</span>
+      {year && <span class="year">{year}</span>}
+    </div>
+
+    <h2 class="card-title">
+      {title}
+      <svg class="arrow" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 13L13 3M13 3H6M13 3V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </h2>
+
+    <p class="card-desc">{description}</p>
+
+    {tags.length > 0 && (
+      <ul class="tags">
+        {tags.map((tag) => <li class="tag">{tag}</li>)}
+      </ul>
+    )}
+  </a>
 </li>
+
 <style>
-	.link-card {
-		list-style: none;
-		display: flex;
-		padding: 1px;
-		background-color: #23262d;
-		background-image: none;
-		background-size: 400%;
-		border-radius: 7px;
-		background-position: 100%;
-		transition: background-position 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-		box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-	}
-	.link-card > a {
-		width: 100%;
-		text-decoration: none;
-		line-height: 1.4;
-		padding: calc(1.5rem - 1px);
-		border-radius: 8px;
-		color: white;
-		background-color: #23262d;
-		opacity: 0.8;
-	}
-	h2 {
-		margin: 0;
-		font-size: 1.25rem;
-		transition: color 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	p {
-		margin-top: 0.5rem;
-		margin-bottom: 0;
-	}
-	.link-card:is(:hover, :focus-within) {
-		background-position: 0;
-		background-image: var(--accent-gradient);
-	}
-	.link-card:is(:hover, :focus-within) h2 {
-		color: rgb(var(--accent-light));
-	}
+  .card {
+    list-style: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--accent);
+  }
+
+  .card > a {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.75rem;
+    height: 100%;
+    color: var(--text);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25em 0.65em;
+    border-radius: 999px;
+    font-weight: 500;
+  }
+
+  .status--uncontinued {
+    background: rgba(222, 74, 74, 0.12);
+    color: #de4a4a;
+    border: 1px solid rgba(222, 74, 74, 0.25);
+  }
+
+  .status--wip {
+    background: rgba(251, 191, 36, 0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.25);
+  }
+
+  .status--archived {
+    background: rgba(148, 163, 184, 0.1);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .year {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    transition: color 0.25s ease;
+    line-height: 1.2;
+  }
+
+  .card:hover .card-title {
+    color: var(--accent);
+  }
+
+  .arrow {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    opacity: 0;
+    transform: translate(-4px, 4px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    color: var(--accent);
+  }
+
+  .card:hover .arrow {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+
+  .card-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.65;
+    flex: 1;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin-top: 0.25rem;
+  }
+
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--accent);
+    background: var(--accent-dim);
+    border: 1px solid rgba(232, 255, 90, 0.2);
+    border-radius: 4px;
+    padding: 0.2em 0.55em;
+    letter-spacing: 0.03em;
+  }
 </style>
